@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:layout="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>Home Page</h1>
+</body>
+<div layout:fragment="content">
+
+    <form action="/member" role="form" method="post"><!-- th:object="${memberDto}"-->
+        <div style="text-align:center" class="py-3">
+            <button type="button" class="btn btn-outline-dark" onclick="location.href='/logout'">로그아웃</button>
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        </div>
+    </form>
+</div>
+</html>
