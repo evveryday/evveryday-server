@@ -10,8 +10,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 
@@ -22,7 +20,7 @@ public class MemberController {
     private final MemberService memberService;
     private final PasswordEncoder passwordEncoder;
 
-    ///////     회원가입!!!!!!!!!!!
+    ///////     회원가입
     @GetMapping("/join")
     public String memberForm(Model model){
         model.addAttribute("memberDto", new MemberDto());
@@ -45,7 +43,7 @@ public class MemberController {
         return "loginPage";
     }
 
-    ///////     로그인!!!!!!!!!!!!
+    ///////     로그인
     @GetMapping("/login")
     public String loginPage() { return "loginPage"; }
 
@@ -58,13 +56,13 @@ public class MemberController {
     @PostMapping("/login")
     public String execLogin(){ return "memberPage"; }
 
-    ///////     로그아웃!!!!!!!!!!!
+    ///////     로그아웃
     @GetMapping("/logout")
     public String execLogout(){
         return "redirect:/login";
     }
 
-    ///////     회원 페이지!!!!!!!!!!
+    ///////     회원 페이지
     @GetMapping("/member")
     public String memberPage(){
         return "memberPage";

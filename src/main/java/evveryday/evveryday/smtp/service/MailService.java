@@ -1,21 +1,17 @@
 package evveryday.evveryday.smtp.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import javax.transaction.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class MailService {
 
     private final JavaMailSender javaMailSender;
-    private static final String senderEmail= "wisejohn950330@gmail.com";
+    private static final String senderEmail= "evveryday3@gmail.com";
     private static int number;
 
     public static void createNumber(){
@@ -43,17 +39,14 @@ public class MailService {
     }
 
     public int sendMail(String mail){
-        //MimeMessage message = CreateMail(mail);
-        //javaMailSender.send(message);
         MimeMessage message = null;
         try {
             message = CreateMail(mail);
             javaMailSender.send(message);
         } catch (Exception e) {
             e.printStackTrace();
-            // 적절한 오류 메시지를 로그로 남깁니다.
             System.out.println("Failed to send email: " + e.getMessage());
-            // 이메일 전송에 실패했음을 나타내는 값을 반환합니다.
+            // 이메일 전송에 실패했을 경우
             return -1;
         }
         return number;

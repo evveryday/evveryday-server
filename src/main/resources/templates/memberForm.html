@@ -82,6 +82,11 @@
             <input type="password" th:field="*{password}" class="form-control" placeholder="비밀번호 입력">
             <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="fieldError">Incorrect data</p>
         </div>
+        <div class="form-group py-2">
+            <label th:for="mbti">MBTI</label>
+            <input type="text" th:field="*{mbti}" class="form-control" placeholder="MBTI 입력">
+            <p th:if="${#fields.hasErrors('mbti')}" th:errors="*{mbti}" class="fieldError">Incorrect data</p>
+        </div>
         <div style="text-align:center" class="py-3">
             <button type="submit" class="btn btn-outline-dark" onclick="location.href='/member'">회원가입</button><br /><br />
             <button type="button" class="btn btn-outline-dark" onclick="location.href='/login'">로그인</button>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:layout="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Group Page</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+        }
+    </style>
+</head>
+<head>
+    <meta charset="UTF-8">
+    <title>Group Page</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+        }
+        .pagination ul {
+            display: flex;
+            list-style-type: none;
+            justify-content: center;
+        }
+        .pagination ul li {
+            margin: 0 5px;
+        }
+        .group-container {
+            display: flex;
+            overflow-x: scroll;
+            scroll-snap-type: x mandatory;
+        }
+
+        .group-item {
+            flex: 0 0 auto;
+            width: 300px;
+            margin-right: 16px;
+            scroll-snap-align: start;
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .group-item img {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+<h1>Group Page</h1>
+<div class="group-container">
+    <div th:each="group : ${recommendedGroups}" class="group-item">
+        <img th:src="@{${group.imagePath}}" th:alt="${group.name + ' image'}">
+        <h2 th:text="${group.name}">그룹명</h2>
+        <p th:text="${group.goal}">그룹 목표</p>
+        <p>인원수: <span th:text="${group.headCount}"></span></p>
+    </div>
+</div>
+<br>
+<table>
+    <thead>
+    <tr>
+        <th>그룹명</th>
+        <th>그룹 목표</th>
+        <th>비고</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="group : ${groups}">
+        <td th:text="${group.name}"></td>
+        <td th:text="${group.goal}"></td>
+
+        <td>
+            <button type="button" class="btn btn-outline-dark" th:attr="data-href=@{'/group/description/' + ${group.name}}" onclick="location.href=this.dataset.href">상세정보 보기</button>
+        </td>
+
+    </tr>
+    </tbody>
+</table>
+<div class="pagination">
+    <ul>
+        <li th:if="${groups.first}">Previous</li>
+        <li th:if="${!groups.first}"><a th:href="@{/member/groups(page=${groups.number - 1})}">Previous</a></li>
+        <li th:each="pageNumber : ${#numbers.sequence(0, groups.totalPages - 1)}">
+            <span th:if="${groups.number == pageNumber}" th:text="${pageNumber + 1}">1</span>
+            <a th:if="${groups.number != pageNumber}" th:href="@{/member/groups(page=${pageNumber})}" th:text="${pageNumber + 1}">1</a>
+        </li>
+        <li th:if="${groups.last}">Next</li>
+        <li th:if="${!groups.last}"><a th:href="@{/member/groups(page=${groups.number + 1})}">Next</a></li>
+    </ul>
+</div>
+
+<button type="button" class="btn btn-outline-dark" onclick="location.href='/group/new'">그룹 생성</button>
+<button type="button" class="btn btn-outline-dark" onclick="location.href='/logout'">로그아웃</button>
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+</body>
+
+</html>

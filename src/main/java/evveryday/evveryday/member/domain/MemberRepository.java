@@ -9,7 +9,4 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
     MemberEntity findByEmail(String email);
-    //MemberEntity findByUsername(String email);
-
-
 }
