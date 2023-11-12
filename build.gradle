@@ -31,6 +31,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'de.codecentric:spring-boot-admin-starter-client:2.4.1'
 	implementation 'javax.mail:javax.mail-api:1.6.2'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
