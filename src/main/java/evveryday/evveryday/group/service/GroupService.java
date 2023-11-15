@@ -76,4 +76,8 @@ public class GroupService {
                 .filter(member -> member.getMbti().equals(mbti))
                 .count();
     }
+
+    public List<GroupEntity> searchGroupsByName(String keyword) {
+        return groupRepository.findByNameContaining(keyword);
+    }
 }

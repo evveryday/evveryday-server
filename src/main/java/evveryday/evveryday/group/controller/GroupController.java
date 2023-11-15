@@ -11,6 +11,7 @@ import evveryday.evveryday.member.service.MemberService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -51,6 +52,13 @@ public class GroupController {
         model.addAttribute("groups", groupList);
 
         return "groupList";
+    }
+
+    /////// 그룹 검색
+    @GetMapping("/group/search")
+    public ResponseEntity<?> searchGroups(@RequestParam String keyword) {
+        List<GroupEntity> searchResults = groupService.searchGroupsByName(keyword);
+        return ResponseEntity.ok(searchResults);
     }
 
     ///////     그룹 생성
