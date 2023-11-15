@@ -51,7 +51,7 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeHttpRequests()
-                .antMatchers("/auth/**", "/refresh-token", "/reissue", "/member/**", "/group/").permitAll()
+                .antMatchers("/auth/**", "/reissue/**", "/member/**", "/groups/**", "/group/**").permitAll()
                 .mvcMatchers("/logout/**").hasRole("USER")
                 .anyRequest().authenticated()
                 .and()

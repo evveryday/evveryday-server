@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -33,25 +34,28 @@ public class GroupController {
     private final MemberService memberService;
 
     ///////     전체 그룹 조회
-    @GetMapping("/member/groups")
-    public String groupList(Model model, @RequestParam(defaultValue = "0") int page) {
-        // 로그인한 Member 정보
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        MemberEntity currentUser = memberService.findByEmail(userDetails.getUsername());
+    @GetMapping("/groups")
+    public Page<GroupDto> groupList(@RequestParam(defaultValue = "0") int page) {
+        UserDetails userDetails = getUserDetails();
+        if (userDetails == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
 
-        // 현재 로그인한 Member의 MBTI 정보
+        return groupService.getAllGroups(PageRequest.of(page, 5));
+    }
+
+    ///////     추천 그룹 조회
+    @GetMapping("/member/recommended-groups")
+    public List<GroupEntity> recommendedGroups() {
+        UserDetails userDetails = getUserDetails();
+        if (userDetails == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+
+        MemberEntity currentUser = memberService.findByEmail(userDetails.getUsername());
         String userMbti = currentUser.getMbti();
 
-        // 추천 그룹 리스트를 가져오기
-        List<GroupEntity> recommendedGroups = groupService.recommendGroupsByMbti(userMbti, currentUser);
-        model.addAttribute("recommendedGroups", recommendedGroups);
-
-        // 한 페이지 당 5개의 그룹
-        Page<GroupDto> groupList = groupService.getAllGroups(PageRequest.of(page, 5));
-        model.addAttribute("groups", groupList);
-
-        return "groupList";
+        return groupService.recommendGroupsByMbti(userMbti, currentUser);
     }
 
     /////// 그룹 검색
@@ -62,12 +66,6 @@ public class GroupController {
     }
 
     ///////     그룹 생성
-    @GetMapping("/group/new")
-    public String createNewGroup(Model model){
-        model.addAttribute("groupDto", new GroupDto());
-        return "groupForm";
-    }
-
     @PostMapping("/group/new")
     public String execCreateNewGroup(@ModelAttribute GroupDto groupDto,
                                  @RequestParam("file") MultipartFile file,
@@ -107,11 +105,9 @@ public class GroupController {
 
     ///////     그룹 상세 설명
     @GetMapping("/group/description/{groupName}")
-    public String groupInfo(@PathVariable String groupName, Model model) {
+    public GroupDto groupInfo(@PathVariable String groupName) {
         GroupEntity groupEntity = groupService.findByName(groupName);
-        GroupDto groupDto = GroupDto.toDto(groupEntity);
-        model.addAttribute("group", groupDto);
-        return "groupInfo";
+        return GroupDto.toDto(groupEntity);
     }
 
     ///////     그룹 참여
@@ -137,5 +133,10 @@ public class GroupController {
         return "redirect:/member/groups";
     }
 
+    private UserDetails getUserDetails() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
+        return principal instanceof UserDetails ? (UserDetails) principal : null;
+    }
 
 }
