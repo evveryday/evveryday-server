@@ -1,5 +1,5 @@
 package evveryday.evveryday.member.domain;
 
 public enum MemberRole {
-    USER, ADMIN
+    NOT_PERMITTED, USER, ADMIN
 }

@@ -2,16 +2,15 @@ package evveryday.evveryday.member.controller;
 
 
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 @AllArgsConstructor
 public class AdminController {
-    ///////     ADMIN 메인 페이지
     @GetMapping("/admin")
-    public String adminPage() {
-        return "admin/main";
+    public ResponseEntity<String> adminPage() {
+        return ResponseEntity.ok("Admin main page");
     }
-
 }

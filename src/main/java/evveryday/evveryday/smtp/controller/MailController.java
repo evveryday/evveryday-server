@@ -1,24 +1,20 @@
 package evveryday.evveryday.smtp.controller;
 
-import evveryday.evveryday.smtp.service.MailService;
+import evveryday.evveryday.member.service.AuthService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class MailController {
 
-    private final MailService mailService;
+    private final AuthService authService;
 
-    @ResponseBody
     @PostMapping("/join/mail")
     public String MailSend(@RequestParam("email") String email){
-        int number = mailService.sendMail(email);
-        String num = "" + number;
-        return num;
+        authService.sendVerificationMail(email);
+        return "Verification mail sent.";
     }
-
 }

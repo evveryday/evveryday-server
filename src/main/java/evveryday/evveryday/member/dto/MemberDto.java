@@ -1,7 +1,10 @@
 package evveryday.evveryday.member.dto;
 
 import evveryday.evveryday.member.domain.MemberEntity;
+import evveryday.evveryday.member.domain.MemberRole;
 import lombok.*;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Getter
 @Setter
@@ -15,7 +18,7 @@ public class MemberDto {
     private Boolean isAccountNonExpired = true;
     private String mbti;
 
-    /*public MemberEntity toEntity(){
+    public MemberEntity toEntity(){
         MemberEntity build = MemberEntity.builder()
                 .id(id)
                 .username(username)
@@ -25,7 +28,7 @@ public class MemberDto {
                 .mbti(mbti)
                 .build();
         return build;
-    }*/
+    }
     @Builder
     public MemberDto(Long id, String username, String email, String password, Boolean isAccountNonExpired, String mbti) {
         this.id = id;
@@ -34,5 +37,28 @@ public class MemberDto {
         this.password = password;
         this.isAccountNonExpired = isAccountNonExpired;
         this.mbti = mbti;
+    }
+    static public MemberDto toDto(MemberEntity member) {
+        return MemberDto.builder()
+                .id(member.getId())
+                .username(member.getUsername())
+                .email(member.getEmail())
+                .isAccountNonExpired(member.getIsAccountNonExpired())
+                .mbti(member.getMbti()).build();
+    }
+
+    public MemberEntity toMember(PasswordEncoder passwordEncoder) {
+        return MemberEntity.builder()
+                .id(id)
+                .email(email)
+                .username(username)
+                .password(passwordEncoder.encode(password))
+                .isAccountNonExpired(isAccountNonExpired=true)
+                .role(MemberRole.NOT_PERMITTED)
+                .mbti(mbti)
+                .build();
+    }
+    public UsernamePasswordAuthenticationToken toAuthentication() {
+        return new UsernamePasswordAuthenticationToken(email, password);
     }
 }

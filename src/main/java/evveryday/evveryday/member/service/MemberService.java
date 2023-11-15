@@ -13,16 +13,20 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 @RequiredArgsConstructor
 @Transactional
 @Service
 public class MemberService implements UserDetailsService {
 
     private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public MemberEntity findByEmail(String email) {
-        return memberRepository.findByEmail(email);
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException(email));
     }
+
 
     ///////     회원가입
     public MemberEntity saveMember(MemberEntity memberEntity, MemberDto memberDto) {
@@ -31,20 +35,17 @@ public class MemberService implements UserDetailsService {
     }
 
     private void validateDuplicateMember(MemberEntity memberEntity) {
-        MemberEntity findMember = memberRepository.findByEmail(memberEntity.getEmail());
-        if (findMember != null) {
-            throw new IllegalStateException("이미 가입된 회원입니다.");
-        }
+        memberRepository.findByEmail(memberEntity.getEmail())
+                .ifPresent(m -> {
+                    throw new IllegalStateException("이미 가입된 회원입니다.");
+                });
     }
 
     ///////     로그인
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        MemberEntity member = memberRepository.findByEmail(email);
-
-        if (member == null) {
-            throw new UsernameNotFoundException(email);
-        }
+        MemberEntity member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException(email));
 
         return User.builder()
                 .username(member.getEmail())
@@ -52,6 +53,6 @@ public class MemberService implements UserDetailsService {
                 .roles(member.getRole().toString())
                 .build();
     }
-
-
 }
+
+

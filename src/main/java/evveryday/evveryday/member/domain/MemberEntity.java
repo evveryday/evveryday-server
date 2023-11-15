@@ -1,6 +1,8 @@
 package evveryday.evveryday.member.domain;
 
 import evveryday.evveryday.group.domain.memberGroup.MemberGroup;
+import lombok.*;
+import javax.persistence.*;
 import evveryday.evveryday.member.dto.MemberDto;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -9,8 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import javax.persistence.*;
-import lombok.*;
 
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -20,7 +20,7 @@ import lombok.*;
 @Builder
 @Table(name="Member")
 @Entity
-public class MemberEntity/* implements UserDetails */{
+public class MemberEntity implements UserDetails {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name = "member_id")
@@ -48,7 +48,7 @@ public class MemberEntity/* implements UserDetails */{
     private List<MemberGroup> MemberGroups;
 
 
-    /*@Override
+    @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singleton(new SimpleGrantedAuthority(role.name()));
     }
@@ -76,7 +76,7 @@ public class MemberEntity/* implements UserDetails */{
     @Override
     public boolean isEnabled() {
         return true; // 계정 활성화 상태를 관리하지 않는다면 true로 고정
-    }*/
+    }
 
     public static MemberEntity toEntity(MemberDto memberDto, PasswordEncoder passwordEncoder){
         MemberEntity member = MemberEntity.builder()
@@ -85,9 +85,13 @@ public class MemberEntity/* implements UserDetails */{
                 .email(memberDto.getEmail())
                 .password(passwordEncoder.encode(memberDto.getPassword()))
                 .isAccountNonExpired(memberDto.getIsAccountNonExpired())
-                .role(MemberRole.USER)
+                .role(MemberRole.NOT_PERMITTED)
                 .mbti(memberDto.getMbti())
                 .build();
         return member;
     }
+    public void verifyEmail() {
+        this.role = MemberRole.USER;
+    }
+
 }

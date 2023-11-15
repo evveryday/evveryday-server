@@ -12,23 +12,17 @@ public class MailService {
 
     private final JavaMailSender javaMailSender;
     private static final String senderEmail= "evveryday3@gmail.com";
-    private static int number;
 
-    public static void createNumber(){
-        number = (int)(Math.random() * (90000)) + 100000;// (int) Math.random() * (최댓값-최소값+1) + 최소값
-    }
-
-    public MimeMessage CreateMail(String mail){
-        createNumber();
+    public MimeMessage createMail(String email, String verificationLink){
         MimeMessage message = javaMailSender.createMimeMessage();
 
         try {
             message.setFrom(senderEmail);
-            message.setRecipients(MimeMessage.RecipientType.TO, mail);
+            message.setRecipients(MimeMessage.RecipientType.TO, email);
             message.setSubject("Evveryday 이메일 인증");
             String body = "";
-            body += "<h3>" + "요청하신 인증 번호입니다." + "</h3>";
-            body += "<h1>" + number + "</h1>";
+            body += "<h3>" + "요청하신 인증 링크입니다. 해당 링크에 접속하여 인증을 완료해주세요." + "</h3>";
+            body += "<h1><a href=\"" + verificationLink + "\">인증 링크</a></h1>";
             body += "<h3>" + "감사합니다." + "</h3>";
             message.setText(body,"UTF-8", "html");
         } catch (MessagingException e) {
@@ -38,17 +32,14 @@ public class MailService {
         return message;
     }
 
-    public int sendMail(String mail){
-        MimeMessage message = null;
+    public void sendMail(String email, String verificationLink){
+        MimeMessage message = createMail(email, verificationLink);
         try {
-            message = CreateMail(mail);
             javaMailSender.send(message);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Failed to send email: " + e.getMessage());
-            // 이메일 전송에 실패했을 경우
-            return -1;
         }
-        return number;
     }
 }
+

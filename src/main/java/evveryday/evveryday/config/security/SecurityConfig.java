@@ -1,71 +1,68 @@
 package evveryday.evveryday.config.security;
 
-import evveryday.evveryday.config.CustomAuthenticationSuccessHandler;
-import evveryday.evveryday.config.UserAuthenticationEntryPoint;
+import evveryday.evveryday.jwt.JwtAccessDeniedHandler;
+import evveryday.evveryday.jwt.JwtAuthenticationEntryPoint;
+import evveryday.evveryday.jwt.JwtSecurityConfig;
+import evveryday.evveryday.jwt.TokenProvider;
+import evveryday.evveryday.member.service.CustomUserDetailsService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.filter.CorsFilter;
 
-import evveryday.evveryday.member.service.MemberService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-
-@Configuration
 @EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+@RequiredArgsConstructor
+@Configuration
+public class SecurityConfig {
+
+    private final TokenProvider tokenProvider;
+    private final CorsFilter corsFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
     @Autowired
-    MemberService memberService;
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    private CustomUserDetailsService customUserDetailsService;
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeRequests()
-                    .mvcMatchers("/", "/join/**", "/login/**", "/join/mail/**").permitAll()
-                    .mvcMatchers("/member/**", "/logout/**", "/group/**").hasRole("USER")
-                    .mvcMatchers("/admin/**", "/logout/**", "/member/**", "/group/**").hasRole("ADMIN")
-                    .antMatchers("/admin/**")
-                    .hasAnyAuthority("ROLE_ADMIN")
-                    .anyRequest().authenticated()
-                    .and()
-                .formLogin()
-                    .loginPage("/login")
-                    .defaultSuccessUrl("/member")
-                    .successHandler(new CustomAuthenticationSuccessHandler())
-                    .usernameParameter("email")
-                    .failureUrl("/login/error")
-                    .and()
-                .logout()
-                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                    .logoutSuccessUrl("/login")
-                    .invalidateHttpSession(true) // 세션 무효화
-                    .deleteCookies("JSESSIONID", "remember-me") // 쿠키 제거
-                    .clearAuthentication(true) // 인증 정보 제거
-                    .and()
+                .csrf().disable()
+                .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling()
-                    .authenticationEntryPoint(new UserAuthenticationEntryPoint())
-                    .and()
-                .csrf().ignoringAntMatchers("/join/mail/**") // csrf disable 설정
-        ;
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .accessDeniedHandler(jwtAccessDeniedHandler)
+                .and()
+                .headers()
+                .frameOptions()
+                .sameOrigin()
+                .and()
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .authorizeHttpRequests()
+                .antMatchers("/auth/**", "/refresh-token", "/reissue", "/member/**", "/group/").permitAll()
+                .mvcMatchers("/logout/**").hasRole("USER")
+                .anyRequest().authenticated()
+                .and()
+                .apply(new JwtSecurityConfig(tokenProvider));
 
+        return http.build();
     }
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(memberService).passwordEncoder(passwordEncoder);
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder);
     }
-
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring()
-                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
-    }
-
 }
+
