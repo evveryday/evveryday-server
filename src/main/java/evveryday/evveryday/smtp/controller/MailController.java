@@ -1,20 +1,21 @@
 package evveryday.evveryday.smtp.controller;
 
-import evveryday.evveryday.member.service.AuthService;
+import evveryday.evveryday.smtp.service.MailService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(maxAge=3600)
 @RestController
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class MailController {
 
-    private final AuthService authService;
+    private final MailService mailService;
 
-    @PostMapping("/join/mail")
-    public String MailSend(@RequestParam("email") String email){
-        authService.sendVerificationMail(email);
-        return "Verification mail sent.";
+    ///////     이메일 인증
+    @GetMapping("/verify")
+    public String verifyEmail(@RequestParam("token") String token) {
+        mailService.verifyEmail(token);
+        return "Email verified.";
     }
 }

@@ -1,4 +1,4 @@
-package evveryday.evveryday.member.dto;
+package evveryday.evveryday.auth.dto;
 
 import lombok.Builder;
 import lombok.Getter;

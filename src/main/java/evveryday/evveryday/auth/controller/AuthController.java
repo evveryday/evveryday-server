@@ -1,35 +1,31 @@
-package evveryday.evveryday.member.controller;
+package evveryday.evveryday.auth.controller;
 
+import evveryday.evveryday.auth.dto.MemberResponseDto;
+import evveryday.evveryday.auth.dto.TokenDto;
+import evveryday.evveryday.auth.dto.TokenRequestDto;
 import evveryday.evveryday.member.dto.*;
-import evveryday.evveryday.member.service.AuthService;
-import evveryday.evveryday.member.service.MemberService;
+import evveryday.evveryday.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 
+@CrossOrigin(maxAge=3600)
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
-    private final MemberService memberService;
-    private final PasswordEncoder passwordEncoder;
 
+    ///////     회원가입
     @PostMapping("/signup")
     public ResponseEntity<MemberResponseDto> signup(@RequestBody MemberDto memberDto) {
         return ResponseEntity.ok(authService.signup(memberDto));
     }
 
-    @GetMapping("/verify")
-    public String verifyEmail(@RequestParam("token") String token) {
-        authService.verifyEmail(token);
-        return "Email verified.";
-    }
-
+    ///////     로그인
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody MemberDto memberDto) {
         try {
@@ -45,16 +41,16 @@ public class AuthController {
         }
     }
 
+    ///////     토큰 재발급
     @PostMapping("/reissue")
     public ResponseEntity<TokenDto> reissue(@RequestBody TokenRequestDto tokenRequestDto) {
         return ResponseEntity.ok(authService.reissue(tokenRequestDto));
     }
 
+    ///////     로그아웃
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestBody TokenRequestDto tokenRequestDto) {
         authService.logout(tokenRequestDto);
         return ResponseEntity.ok().build();
     }
-
-
 }

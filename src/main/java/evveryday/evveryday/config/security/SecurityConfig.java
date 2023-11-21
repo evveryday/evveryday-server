@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -45,14 +44,13 @@ public class SecurityConfig {
                 .and()
                 .headers()
                 .frameOptions()
-                .sameOrigin()
                 .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeHttpRequests()
-                .antMatchers("/auth/**", "/reissue/**", "/member/**", "/groups/**", "/group/**").permitAll()
-                .mvcMatchers("/logout/**").hasRole("USER")
+                .antMatchers("/group/join/**", "/auth/**", "/reissue/**").permitAll()
+                .antMatchers("/member/**", "/auth/logout/**").authenticated()
+                .antMatchers("/groups/**").permitAll()
+                //.mvcMatchers("/member/**", "/group/**", "/logout/**").hasRole("USER")
                 .anyRequest().authenticated()
                 .and()
                 .apply(new JwtSecurityConfig(tokenProvider));

@@ -1,6 +1,6 @@
 package evveryday.evveryday.jwt;
 
-import evveryday.evveryday.member.dto.TokenDto;
+import evveryday.evveryday.auth.dto.TokenDto;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -36,20 +36,22 @@ public class TokenProvider {
     }
 
     public TokenDto generateTokenDto(Authentication authentication) {
-        // 권한들 가져오기
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
         long now = (new Date()).getTime();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String email = userDetails.getUsername();
+        System.out.println(email);
 
         // Access Token 생성
         Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
         String accessToken = Jwts.builder()
-                .setSubject(authentication.getName())       // payload "sub": "name"
-                .claim(AUTHORITIES_KEY, authorities)        // payload "auth": "ROLE_USER"
-                .setExpiration(accessTokenExpiresIn)        // payload "exp": 151621022 (ex)
-                .signWith(key, SignatureAlgorithm.HS512)    // header "alg": "HS512"
+                .setSubject(email)
+                .claim(AUTHORITIES_KEY, authorities)
+                .setExpiration(accessTokenExpiresIn)
+                .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
 
         // Refresh Token 생성
@@ -67,21 +69,25 @@ public class TokenProvider {
     }
 
     public Authentication getAuthentication(String accessToken) {
-        // 토큰 복호화
         Claims claims = parseClaims(accessToken);
 
         if (claims.get(AUTHORITIES_KEY) == null) {
             throw new RuntimeException("권한 정보가 없는 토큰입니다.");
         }
 
-        // 클레임에서 권한 정보 가져오기
+        String[] authArr = claims.get(AUTHORITIES_KEY).toString().split(",");
+        if (authArr.length == 0) {
+            throw new RuntimeException("권한 정보가 잘못된 토큰입니다.");
+        }
+
         Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
+                Arrays.stream(authArr)
+                        .filter(auth -> !auth.trim().isEmpty())
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
-        // UserDetails 객체를 만들어서 Authentication 리턴
-        UserDetails principal = new User(claims.getSubject(), "", authorities);
+        String email = claims.getSubject();
+        UserDetails principal = new User(email, "", authorities);
 
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
@@ -90,32 +96,37 @@ public class TokenProvider {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
-        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            log.info("잘못된 JWT 서명입니다.");
+        } catch (io.jsonwebtoken.security.SecurityException e) {
+            log.info("잘못된 JWT 서명입니다.", e);
         } catch (ExpiredJwtException e) {
-            log.info("만료된 JWT 토큰입니다.");
+            log.info("만료된 JWT 토큰입니다.", e);
         } catch (UnsupportedJwtException e) {
-            log.info("지원되지 않는 JWT 토큰입니다.");
+            log.info("지원되지 않는 JWT 토큰입니다.", e);
         } catch (IllegalArgumentException e) {
-            log.info("JWT 토큰이 잘못되었습니다.");
+            log.info("JWT 토큰이 잘못되었습니다.", e);
+        } catch (JwtException e) {
+            log.info("JWT 토큰 유효성 검증에 실패하였습니다.", e);
         }
         return false;
     }
 
     private Claims parseClaims(String accessToken) {
-        try {
-            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();
-        } catch (ExpiredJwtException e) {
-            return e.getClaims();
-        }
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(accessToken)
+                .getBody();
+
+        return claims;
     }
+
     public String createNewAccessToken(String refreshToken) {
+
         // refreshToken의 유효성 검사
         if (!validateToken(refreshToken)) {
             throw new RuntimeException("유효하지 않은 refresh token입니다.");
         }
 
-        // refreshToken에서 사용자 이름 추출
         Claims claims = parseClaims(refreshToken);
         String username = claims.getSubject();
 
@@ -129,6 +140,9 @@ public class TokenProvider {
                 .compact();
 
         return newAccessToken;
+    }
+    public String getEmailFromToken(String token) {
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
     }
 
 

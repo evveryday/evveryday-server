@@ -1,4 +1,4 @@
-package evveryday.evveryday.member.domain;
+package evveryday.evveryday.auth.domain;
 
 import lombok.*;
 import javax.persistence.Column;

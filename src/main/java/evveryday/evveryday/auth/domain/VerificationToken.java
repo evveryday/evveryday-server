@@ -1,8 +1,7 @@
-package evveryday.evveryday.member.domain;
+package evveryday.evveryday.auth.domain;
 
 import lombok.Getter;
 import lombok.Setter;
-
 import javax.persistence.*;
 import java.time.LocalDateTime;
 

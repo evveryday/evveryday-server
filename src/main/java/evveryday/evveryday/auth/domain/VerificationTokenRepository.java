@@ -1,5 +1,6 @@
-package evveryday.evveryday.member.domain;
+package evveryday.evveryday.auth.domain;
 
+import evveryday.evveryday.auth.domain.VerificationToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
