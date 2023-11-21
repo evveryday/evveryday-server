@@ -38,14 +38,6 @@ public class MemberDto {
         this.isAccountNonExpired = isAccountNonExpired;
         this.mbti = mbti;
     }
-    static public MemberDto toDto(MemberEntity member) {
-        return MemberDto.builder()
-                .id(member.getId())
-                .username(member.getUsername())
-                .email(member.getEmail())
-                .isAccountNonExpired(member.getIsAccountNonExpired())
-                .mbti(member.getMbti()).build();
-    }
 
     public MemberEntity toMember(PasswordEncoder passwordEncoder) {
         return MemberEntity.builder()

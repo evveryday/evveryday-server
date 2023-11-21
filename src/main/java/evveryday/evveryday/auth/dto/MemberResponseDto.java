@@ -1,4 +1,4 @@
-package evveryday.evveryday.member.dto;
+package evveryday.evveryday.auth.dto;
 
 import evveryday.evveryday.member.domain.MemberEntity;
 import lombok.Getter;

@@ -1,5 +1,7 @@
 package evveryday.evveryday.member.domain;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import evveryday.evveryday.group.domain.memberGroup.MemberGroup;
 import lombok.*;
 import javax.persistence.*;
@@ -20,6 +22,7 @@ import java.util.List;
 @Builder
 @Table(name="Member")
 @Entity
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class MemberEntity implements UserDetails {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
@@ -47,6 +50,10 @@ public class MemberEntity implements UserDetails {
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<MemberGroup> MemberGroups;
 
+
+    public void verifyEmail() {
+        this.role = MemberRole.USER;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -89,9 +96,6 @@ public class MemberEntity implements UserDetails {
                 .mbti(memberDto.getMbti())
                 .build();
         return member;
-    }
-    public void verifyEmail() {
-        this.role = MemberRole.USER;
     }
 
 }
